@@ -1,0 +1,17 @@
+.git
+.env
+.env.*
+.venv
+.local
+.uv-cache
+.pytest_cache
+.ruff_cache
+__pycache__
+**/__pycache__
+data
+tests
+*.log
+*.db*
+*.sqlite*
+*.pem
+*.key

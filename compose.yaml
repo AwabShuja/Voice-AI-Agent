@@ -1,0 +1,39 @@
+services:
+  api:
+    build: .
+    restart: unless-stopped
+    environment:
+      API_KEY: ${API_KEY:?Generate .env using scripts/init_local.py}
+      VAPI_WEBHOOK_SECRET: ${VAPI_WEBHOOK_SECRET:?Generate .env using scripts/init_local.py}
+      DATABASE_URL: sqlite:////app/data/patients.db
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      DRAFT_TTL_SECONDS: ${DRAFT_TTL_SECONDS:-1800}
+      MAX_DRAFTS: ${MAX_DRAFTS:-1000}
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - ./data:/app/data
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+  ngrok:
+    image: ngrok/ngrok:3
+    profiles: [public]
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN:-}
+    command:
+      - http
+      - --url=https://${NGROK_DOMAIN:-not-configured.invalid}
+      - --log=stdout
+      - api:8000
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
