@@ -11,30 +11,64 @@ keep the existing values when continuing this workspace.
 | `API_KEY` | Already generated locally. Use this value in Swagger's patient API authorization and share it privately with reviewers. |
 | `VAPI_WEBHOOK_SECRET` | Already generated locally. Copy this into the Vapi bearer credential described below. |
 | `VAPI_API_KEY` | Your **private** key from the Vapi dashboard's API Keys page. |
-| `GROQ_API_KEY` | Create a key in [Groq Console](https://console.groq.com/keys); also add it to the Groq integration inside Vapi. |
+| `GEMINI_API_KEY` | Create a key in [Google AI Studio](https://aistudio.google.com/app/apikey); add the same key to the Google integration inside Vapi. |
 | `NGROK_AUTHTOKEN` | Copy **Your Authtoken** from the [ngrok dashboard](https://dashboard.ngrok.com/get-started/your-authtoken). This is an agent authtoken, not an ngrok API key. |
 | `NGROK_DOMAIN` | Copy your account's assigned free domain from the ngrok dashboard's Domains page. Enter the hostname only. |
 | `PUBLIC_BASE_URL` | `https://` followed by exactly the same ngrok hostname, without a path. |
 | `VAPI_CREDENTIAL_ID` | The ID of the custom bearer credential you create in Vapi below. This is an ID, not the secret itself. |
 
+This workspace was changed from Groq to Gemini. In your existing `.env`, remove the
+old `GROQ_API_KEY` and `GROQ_MODEL` lines and add:
+
+```dotenv
+GEMINI_API_KEY=YOUR_PRIVATE_GOOGLE_AI_STUDIO_KEY
+GEMINI_MODEL=gemini-3.5-flash
+```
+
+Do not copy the placeholder text literally. The application ignores the old Groq
+variables, so leaving only those variables will make provider preflight fail.
+
 Leave `VAPI_ASSISTANT_ID` and `VAPI_PHONE_NUMBER_ID` empty for initial provisioning.
 If you already have an assistant/number to reuse, enter their existing IDs instead.
-Keep `GROQ_MODEL=openai/gpt-oss-120b` and the database settings unchanged.
+Keep `GEMINI_MODEL=gemini-3.5-flash` unless your Vapi model dropdown shows a different
+Google model you specifically want to use. The database settings stay unchanged.
 The selected Vapi-managed Deepgram speech configuration does not require a separate
 Deepgram key in this application's `.env`.
 
+## What each credential protects
+
+- `API_KEY` protects the patient REST endpoints. In Swagger, select **Authorize** and
+  paste the value exactly; do not add `Bearer`. Reviewers send it as `X-API-Key`.
+- `VAPI_WEBHOOK_SECRET` protects `/vapi/webhook`. It is shared only between FastAPI
+  and the Vapi custom bearer credential. Do not use your Vapi API key here.
+- `VAPI_API_KEY` authorizes the setup script to create/update your Vapi assistant and
+  free phone number. In the Vapi dashboard, open the organization API Keys page,
+  create a private key, copy it once, and store it only in `.env`.
+- `GEMINI_API_KEY` authorizes Gemini model calls. The preflight script verifies it
+  directly, while Vapi stores the same key in its Google integration for live calls.
+- `NGROK_AUTHTOKEN` signs the ngrok agent into your account. It is different from an
+  ngrok API key and is never placed in the assistant configuration.
+- `VAPI_CREDENTIAL_ID` is safe to reference in assistant configuration because Vapi
+  resolves it to the hidden webhook secret. The ID itself cannot replace the token.
+
 ## Configure Vapi authentication
 
-1. In Vapi **Integrations**, configure Groq using your Groq API key.
-2. Open **Integrations > Server Configuration > Add Custom Credential**.
-3. Choose **Bearer Token** and a descriptive name such as `Patient Registration Webhook`.
-4. Set **Token** to your local `VAPI_WEBHOOK_SECRET`. Keep **Header Name** as
+1. Open [Google AI Studio](https://aistudio.google.com/app/apikey), sign in, and select
+   **Create API key**. Choose or create a Google Cloud project, copy the key once, and
+   place it in `.env` as `GEMINI_API_KEY`. Do not add quotes or spaces around it.
+2. In Vapi, open **Integrations**, find **Google** (the model provider), and paste the
+   same Gemini API key. Save it and confirm Vapi reports that the integration is connected.
+3. Open **Integrations > Server Configuration > Add Custom Credential**.
+4. Choose **Bearer Token** and a descriptive name such as `Patient Registration Webhook`.
+5. Set **Token** to your local `VAPI_WEBHOOK_SECRET`. Keep **Header Name** as
    `Authorization` and **Include Bearer Prefix** enabled. Enter the secret without
    manually adding `Bearer ` to it.
-5. Save the credential and put its ID in `.env` as `VAPI_CREDENTIAL_ID`.
+6. Save the credential and put its ID in `.env` as `VAPI_CREDENTIAL_ID`.
 
 The assistant generator attaches this credential to the assistant and registration
 tools. This follows [Vapi's server authentication flow](https://docs.vapi.ai/server-url/server-authentication).
+Vapi documents Google as provider `google` and lists `gemini-3.5-flash` among its
+[supported Gemini models](https://docs.vapi.ai/providers/model/gemini).
 
 ## Start ngrok on Windows
 
@@ -120,12 +154,18 @@ inventory and account eligibility; the script does not buy a paid number.
 
 ## Inputs still needed for deployment and submission
 
-- AWS account access through your own console or local profile, verified credit
-  balance/expiry, and the intended review window. The application needs no AWS key.
-- An EC2 SSH key and reachable instance address after provisioning.
+- An active Azure for Students subscription, verified credit balance/expiry, available
+  B-series VM quota, and the intended review window.
+- An Azure VM SSH `.pem` key and reachable public IP after provisioning.
 - Your private GitHub repository destination and authenticated Git access.
 - The reviewer usernames/emails supplied by the assignment, for repository access.
 
-Follow [the AWS runbook](../deploy/AWS.md) when moving the app and tunnel to EC2.
-Stop the laptop tunnel before starting the same domain on EC2. The final review
-setup must stay reachable independently of this development computer.
+The application itself does **not** need an Azure service principal, client secret, or
+access token. You need your Azure portal login with MFA, an active Azure for Students
+subscription, sufficient remaining credit, an available B1s VM quota, and the `.pem`
+SSH key created during VM launch. Keep the key outside the repository and never paste
+it into `.env`.
+
+Follow the step-by-step [Azure runbook](../deploy/AZURE.md) when moving the app and
+tunnel to the VM. Stop the laptop tunnel before starting the same domain on Azure.
+The final review setup must stay reachable independently of this development computer.

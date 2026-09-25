@@ -1,7 +1,7 @@
 # Voice AI Patient Registration
 
 A synthetic patient registration assessment built with FastAPI, SQLite, Vapi, and
-Groq. A caller supplies demographics, corrects mistakes, hears the complete readback,
+Google Gemini. A caller supplies demographics, corrects mistakes, hears the complete readback,
 and explicitly confirms before the application creates a patient record.
 
 **Use fictional patient information only.** Automated testing is the sole bonus
@@ -19,7 +19,7 @@ feature; the application does not include a patient dashboard or returning-calle
 | Live phone acceptance | **Not yet verified** |
 
 The implementation includes the application, migration, automated tests, assistant
-configuration generator, provider checks, Docker configuration, and AWS runbook.
+configuration generator, provider checks, Docker configuration, and Azure runbook.
 Missing account access is not recorded as a vendor provisioning failure. Update this
 table with real values after completing [the acceptance checks](docs/ACCEPTANCE.md).
 
@@ -46,7 +46,7 @@ uv run python -m scripts.check_api
 ```
 
 The initialization script creates random, distinct API and webhook secrets and never
-overwrites an existing `.env`. Neither Groq nor Vapi credentials are needed to run
+overwrites an existing `.env`. Neither Gemini nor Vapi credentials are needed to run
 the REST API or automated tests. The local SQLite file is `data/patients.db`.
 
 On Linux/macOS the same `uv` commands work. Python 3.13 is required. To run with
@@ -59,20 +59,20 @@ docker compose logs -f api
 ```
 
 The container runs migrations before Uvicorn starts. On Linux, create the host
-`data` directory with ownership `10001:10001` first; see the AWS runbook.
+`data` directory with ownership `10001:10001` first; see the Azure runbook.
 
 ## Connect the voice assistant
 
 For a field-by-field account setup walkthrough, use the
 [credentials and ngrok guide](docs/SETUP_CREDENTIALS.md).
 
-1. Sign into Vapi, Groq, and ngrok. Verify your **actual remaining free credits** and
+1. Sign into Vapi, Google AI Studio, and ngrok. Verify your **actual remaining credits** and
    the intended review window. Leave Vapi auto-reload off; no scripts here purchase
    credits, change subscriptions, or buy paid phone numbers.
-2. Put `VAPI_API_KEY`, `GROQ_API_KEY`, `NGROK_AUTHTOKEN`, and `NGROK_DOMAIN` in `.env`.
+2. Put `VAPI_API_KEY`, `GEMINI_API_KEY`, `NGROK_AUTHTOKEN`, and `NGROK_DOMAIN` in `.env`.
    `NGROK_DOMAIN` is the assigned hostname without `https://` or a path.
-3. In Vapi **Integrations**, connect your Groq API key. The selected model is
-   `openai/gpt-oss-120b`, served by Groq. The backend does not proxy LLM inference.
+3. In Vapi **Integrations**, connect your Google Gemini API key. The selected model is
+   `gemini-3.5-flash`, served by Google. The backend does not proxy LLM inference.
    Deepgram recognition and speech use Vapi's integration and available credits.
 4. In Vapi's **Server Configuration** integration, create a bearer credential using
    the local `VAPI_WEBHOOK_SECRET`, with the `Authorization` header and bearer prefix
@@ -113,7 +113,7 @@ real inbound call to the provisioned number. Browser testing alone does not sati
 the assignment. Verify U.S. number reachability from the reviewer's calling service.
 The configured limit is 15 minutes per call; available credits still govern usage.
 
-Official integration references: [Groq](https://docs.vapi.ai/providers/model/groq),
+Official integration references: [Google Gemini](https://docs.vapi.ai/providers/model/gemini),
 [Deepgram STT](https://docs.vapi.ai/providers/transcriber/deepgram),
 [Deepgram TTS](https://docs.vapi.ai/providers/voice/deepgram),
 [webhook authentication](https://docs.vapi.ai/server-url/server-authentication),
@@ -123,7 +123,7 @@ Official integration references: [Groq](https://docs.vapi.ai/providers/model/gro
 ## Architecture and project structure
 
 ```text
-Phone -> Vapi (Deepgram STT -> Groq -> Deepgram TTS)
+Phone -> Vapi (Deepgram STT -> Gemini -> Deepgram TTS)
                   |
                   | authenticated synchronous tool calls
                   v
@@ -144,7 +144,7 @@ app/
 migrations/     Alembic schema history
 tests/          API, voice integration, provider mocks, real process restart test
 scripts/        Environment initialization, preflight, provisioning, tunnel, backup
-deploy/         Container startup and AWS deployment runbook
+deploy/         Container startup and Azure deployment runbook
 docs/           Manual acceptance and delivery record
 ```
 
@@ -152,7 +152,7 @@ FastAPI provides validation and interactive API documentation. SQLAlchemy keeps
 database operations explicit, and Alembic provides repeatable schema initialization
 without destructive startup behavior. SQLite suits this single-instance assessment;
 its file must remain on durable storage. Vapi manages streaming audio and interruptions
-while Groq generates conversational responses and tool calls. Using a managed voice
+while Gemini generates conversational responses and tool calls. Using a managed voice
 pipeline keeps the custom code focused on registration behavior.
 
 The annotated [system prompt](app/voice/prompt.md) is included with the code. The
@@ -282,8 +282,8 @@ and malformed webhook-envelope failures still use normal HTTP error statuses.
 | `DRAFT_TTL_SECONDS` | Draft inactivity expiry; default 1800 |
 | `MAX_DRAFTS` | Maximum simultaneous drafts; default 1000 |
 | `VAPI_API_KEY` | Private Vapi key used by setup scripts |
-| `GROQ_API_KEY` | Used by online preflight; also configure it privately in Vapi Integrations |
-| `GROQ_MODEL` | Default `openai/gpt-oss-120b` |
+| `GEMINI_API_KEY` | Google AI Studio key used by online preflight; also configure it privately in Vapi Integrations |
+| `GEMINI_MODEL` | Default `gemini-3.5-flash`; may be changed to another Google model supported by Vapi |
 | `VAPI_CREDENTIAL_ID` | Vapi bearer credential referencing the webhook secret |
 | `VAPI_ASSISTANT_ID` | Optional existing assistant ID for repeatable configuration |
 | `VAPI_PHONE_NUMBER_ID` | Optional existing number ID to attach |
@@ -320,8 +320,9 @@ during review. Container logs rotate at 10 MB, keeping three files per service.
 
 ## Persistence, deployment, and backup
 
-Follow [the EC2 deployment runbook](deploy/AWS.md). The important invariant is that
-`data/patients.db` and its SQLite WAL files live on EBS, outside the container layer.
+Follow [the Azure for Students deployment runbook](deploy/AZURE.md). The important
+invariant is that `data/patients.db` and its SQLite WAL files live on the VM's persistent
+Azure managed disk, outside the container layer.
 Run one application instance/worker because unfinished drafts are process-local.
 The API and ngrok both restart automatically under Compose; the laptop can be off.
 
@@ -352,12 +353,12 @@ application version. Container deployments use the mounted `/app/data` path.
   Recheck the bearer prefix and the credential ID on the assistant and each tool.
 - If the agent reports no tool result, check the public HTTPS URL and correlated
   result strings in the Vapi dashboard. Server logs identify failed calls by call ID.
-- Free-credit exhaustion or ngrok/AWS limits can interrupt review availability.
+- Free-credit exhaustion or ngrok/Azure limits can interrupt review availability.
   Check balances and expiry beforehand; do not enable paid reloads as a workaround.
 - If Docker reports a missing engine on Windows, start Docker Desktop with Linux
   containers, or continue using the native Python instructions.
 
 Remaining delivery work is account setup/verification, real U.S. number provisioning,
-AWS deployment and reboot verification, live conversation acceptance, and private
+Azure deployment and reboot verification, live conversation acceptance, and private
 GitHub publication/reviewer access. Record actual outcomes and blockers in
 [the acceptance record](docs/ACCEPTANCE.md); replace the pending submission fields above.

@@ -12,7 +12,9 @@ results do not establish real phone reachability or speech quality.
 
 Latest local verification (2026-09-24):
 
-- **54 automated tests passed**, including the separate-process HTTP restart test.
+- The **54-test full-suite baseline passed**, including the separate-process HTTP
+  restart test. The Gemini switch adds one provider-preflight test (55 now collect);
+  both affected Gemini configuration/preflight tests pass locally.
 - Ruff lint and formatting checks passed.
 - Alembic reported no pending schema differences.
 - Docker Compose configuration validation passed.
@@ -37,7 +39,7 @@ patient API behavior.
 | Field errors, corrections, optional defaults, full readback payload | `tests/test_voice.py` |
 | Prepare/confirm/save, stale token rejection, start over | `tests/test_voice.py` |
 | Dropped call before save, retry safety, transaction rollback | `tests/test_voice.py` |
-| Groq/Deepgram config, credentials, bounded draft state | `tests/test_configuration.py` |
+| Gemini/Deepgram config, credentials, bounded draft state | `tests/test_configuration.py` |
 | Idempotent free-number setup with partial failure handling | `tests/test_configuration.py` |
 
 ## Manual voice scenarios
@@ -58,27 +60,28 @@ Record the date, provider call ID, outcome, and any corrective change for each.
 - [ ] Confirm a full readback; hear success only after persistence, then a graceful hangup.
 - [ ] Retrieve the record with the reviewer API key.
 - [ ] Verify a graceful save-failure/retry response in a controlled test environment.
-- [ ] Restart the backend and reboot EC2; retrieve the original UUID afterward.
+- [ ] Restart the backend and reboot the Azure VM; retrieve the original UUID afterward.
 - [ ] Make another call and verify the first registration remains available.
 
 ## Account and live delivery blockers
 
-Initial environment inspection found no configured Vapi/Groq/ngrok credentials or
-AWS/GitHub account access. Docker Desktop has since been started and the image and
-container restart checks passed. No paid resources, phone numbers, calls, or cloud
-instances have been created by this implementation session at this point.
+The Azure for Students subscription is reported as available, but its remaining credit,
+expiry, B-series quota, and regional capacity have not yet been verified from this
+environment. Docker Desktop has been started and the image and container restart checks
+passed. No phone numbers, calls, or cloud VMs have been created by this implementation
+session at this point.
 
 Fill in after setup:
 
 | Check | Verified result |
 | --- | --- |
 | Vapi available free credits; auto-reload off | Pending |
-| Groq model access and integration | Pending |
+| Gemini model access and integration | Pending |
 | ngrok assigned domain and HTTPS reachability | Pending |
-| AWS credits, expiry, EC2/EBS coverage | Pending |
+| Azure for Students credit, expiry, B1s quota, and managed disk coverage | Pending |
 | Review window | Pending |
 | U.S. number inventory and inbound reachability | Pending |
-| EC2 restart/reboot persistence | Pending |
+| Azure VM restart/reboot persistence | Pending |
 | Private repository and reviewer invitations | Pending |
 
 If number provisioning fails, record the date, requested area code, operation, HTTP
@@ -93,7 +96,7 @@ browser-test instructions even if the external blocker remains.
 - [ ] Push to a private GitHub repository and invite the supplied reviewer accounts.
 - [ ] Confirm Git excludes `.env`, data files, logs, and private keys.
 - [ ] Include setup, architecture, stack rationale, annotated prompt, tests, and limitations.
-- [ ] Keep EC2, ngrok, Vapi, and adequate free credits available throughout review.
+- [ ] Keep the Azure VM, ngrok, Vapi, and adequate credits available throughout review.
 
 For GitHub publication, after authenticating your own GitHub CLI and reviewing files:
 

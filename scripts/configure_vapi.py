@@ -71,7 +71,9 @@ def main() -> int:
         if url.scheme != "https" or not url.netloc or url.path not in ("", "/"):
             raise ValueError("PUBLIC_BASE_URL must be an HTTPS origin without a path")
         configuration = assistant_configuration(
-            base_url, require("VAPI_CREDENTIAL_ID"), os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
+            base_url,
+            require("VAPI_CREDENTIAL_ID"),
+            os.getenv("GEMINI_MODEL", "gemini-3.5-flash"),
         )
         destination = Path(".local/vapi-assistant.json")
         destination.parent.mkdir(parents=True, exist_ok=True)
