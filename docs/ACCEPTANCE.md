@@ -1,6 +1,6 @@
 # Acceptance and submission record
 
-Requirements source: [VOICE_AI_AGENT.md](../VOICE_AI_AGENT.md).
+Requirements source: the take-home assessment brief supplied by CareCloud.
 Only synthetic data may be used. Automated tests are the sole selected bonus.
 
 ## Automated evidence
@@ -65,24 +65,22 @@ Record the date, provider call ID, outcome, and any corrective change for each.
 
 ## Account and live delivery blockers
 
-The Azure for Students subscription is reported as available, but its remaining credit,
-expiry, B-series quota, and regional capacity have not yet been verified from this
-environment. Docker Desktop has been started and the image and container restart checks
-passed. No phone numbers, calls, or cloud VMs have been created by this implementation
-session at this point.
+The application is deployed to an Azure VM through Docker Compose, exposed through an
+assigned ngrok HTTPS domain, and connected to a Vapi-managed U.S. number. Remaining
+credit, live-call, and full VM-reboot checks must still be recorded by the operator.
 
 Fill in after setup:
 
 | Check | Verified result |
 | --- | --- |
 | Vapi available free credits; auto-reload off | Pending |
-| Gemini model access and integration | Pending |
-| ngrok assigned domain and HTTPS reachability | Pending |
+| Gemini model access and integration | API access and Vapi assistant configuration verified |
+| ngrok assigned domain and HTTPS reachability | Public health, Swagger, and authenticated API checks passed |
 | Azure for Students credit, expiry, B1s quota, and managed disk coverage | Pending |
 | Review window | Pending |
-| U.S. number inventory and inbound reachability | Pending |
+| U.S. number inventory and inbound reachability | Number provisioned; real inbound reachability pending |
 | Azure VM restart/reboot persistence | Pending |
-| Private repository and reviewer invitations | Pending |
+| Private repository and reviewer invitations | Repository created; reviewer invitation pending |
 
 If number provisioning fails, record the date, requested area code, operation, HTTP
 status, provider's non-secret explanation, and attempted resolution here. Do not

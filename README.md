@@ -12,16 +12,16 @@ feature; the application does not include a patient dashboard or returning-calle
 | Item | Current value |
 | --- | --- |
 | Local API | `http://127.0.0.1:8000` after starting the application |
-| API documentation | `http://127.0.0.1:8000/docs` |
-| Live phone number | **Pending Vapi credentials and number provisioning** |
-| Public API base URL | **Pending ngrok account domain and running deployment** |
-| Private repository URL | **Pending GitHub destination/account access** |
+| API documentation | `https://impermissible-brittney-supercerebral.ngrok-free.dev/docs` |
+| Live phone number | `+1 (302) 754-2013` |
+| Public API base URL | `https://impermissible-brittney-supercerebral.ngrok-free.dev` |
+| Private repository URL | `https://github.com/AwabShuja/Voice-AI-Agent` (reviewer invitation required) |
 | Live phone acceptance | **Not yet verified** |
 
 The implementation includes the application, migration, automated tests, assistant
 configuration generator, provider checks, Docker configuration, and Azure runbook.
-Missing account access is not recorded as a vendor provisioning failure. Update this
-table with real values after completing [the acceptance checks](docs/ACCEPTANCE.md).
+Complete the remaining live-call and persistence checks in
+[the acceptance record](docs/ACCEPTANCE.md) before submission.
 
 ## Local setup (Windows PowerShell)
 
