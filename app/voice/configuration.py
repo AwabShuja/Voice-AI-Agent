@@ -77,7 +77,7 @@ def assistant_configuration(base_url: str, credential_id: str, model: str) -> di
         "firstMessage": "Hello! I'm your registration assistant. This is a demo, so please use "
         "fictional patient details only. What is the patient's first and last name?",
         "model": {
-            "provider": "groq",
+            "provider": "google",
             "model": model,
             "temperature": 0.2,
             "maxTokens": 2048,

@@ -1,7 +1,7 @@
 [project]
 name = "voice-patient-registration"
 version = "0.1.0"
-description = "Voice patient registration with FastAPI, SQLite, Vapi, and Groq. Synthetic data only."
+description = "Voice patient registration with FastAPI, SQLite, Vapi, and Gemini. Synthetic data only."
 requires-python = ">=3.13,<3.14"
 dependencies = [
   "fastapi>=0.115,<1",
